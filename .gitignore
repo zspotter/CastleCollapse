@@ -1,0 +1,17 @@
+*.war
+*.ear
+*.class
+
+.project
+.metadata
+bin/**
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
+*.launch
+/bin

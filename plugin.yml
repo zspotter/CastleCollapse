@@ -1,0 +1,3 @@
+name: CastleCollapse
+main: me.zspotter.CastleCollapse.bukkit.CCPlugin
+version: 0.1
