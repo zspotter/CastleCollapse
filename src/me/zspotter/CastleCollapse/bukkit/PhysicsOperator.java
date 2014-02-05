@@ -24,5 +24,5 @@ public interface PhysicsOperator {
 	 * 	to be affected by CC's gravity
 	 */
 	public void applyGravity(Block block) throws IllegalArgumentException;
-
+	
 }

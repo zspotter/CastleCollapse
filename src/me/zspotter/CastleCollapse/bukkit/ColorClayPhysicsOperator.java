@@ -1,5 +1,8 @@
 package me.zspotter.CastleCollapse.bukkit;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -19,6 +22,29 @@ public class ColorClayPhysicsOperator implements PhysicsOperator {
 	
 	private static final int STABILITY_MIN = 0;
 	private static final int STABILITY_MAX = (STABILITY_DATA.length - 1);
+	
+	private static final HashSet<Material> STABLE_MATERIALS = new HashSet<Material>(Arrays.asList(new Material[]
+		{
+			Material.BEDROCK,
+			Material.STONE,
+			Material.DIRT,
+			Material.GRASS,
+			Material.SANDSTONE,
+			Material.MYCEL,
+			Material.COBBLESTONE,
+			Material.OBSIDIAN,
+			Material.MOSSY_COBBLESTONE,
+			Material.SMOOTH_BRICK,
+			Material.BRICK,
+			Material.NETHER_BRICK,
+			Material.NETHERRACK
+		}));
+	
+	private CCPlugin plug;
+	
+	public ColorClayPhysicsOperator(CCPlugin plugin) {
+		plug = plugin;
+	}
 	
 	@Override
 	public boolean doesGravityEffect(Material material) {
@@ -45,14 +71,20 @@ public class ColorClayPhysicsOperator implements PhysicsOperator {
 		
 		if (stability == STABILITY_MIN) {
 			// Block will fall due to instability
-			block.setType(Material.AIR);
-			block.getWorld().spawnFallingBlock(block.getLocation(), 
-					GRAV_MATERIAL, STABILITY_DATA[STABILITY_MIN])
-					.setDropItem(false);
-			
-		} else {
-			block.setData(STABILITY_DATA[stability]);
-		}
+			block.setType(Material.AIR); // Set block to air now, replace it with falling sand after the next if-statement
+			// If block beneath isn't grav block and isn't a stable material, break it
+			Block beneath = block.getRelative(BlockFace.DOWN);
+			if (beneath != null && !beneath.isEmpty() && 
+					!doesGravityEffect(beneath.getType()) && !STABLE_MATERIALS.contains(beneath.getType())) {
+				beneath.breakNaturally();
+			}
+			// Make the block fall
+			block.getWorld().spawnFallingBlock(block.getLocation(), GRAV_MATERIAL, STABILITY_DATA[STABILITY_MIN]);
+			return;
+		} 
+		
+		// Set block stability metadata
+		block.setData(STABILITY_DATA[stability]);
 	}
 	
 	private int calculateStability(Block block) {
@@ -103,12 +135,12 @@ public class ColorClayPhysicsOperator implements PhysicsOperator {
 	 * @return A value from STABILIT_MIN to (STABILITY_MAX+1)
 	 */
 	private int stabilityOf(Block block) {
-		if (!block.getType().isSolid() || block.getType().isTransparent()) {
-			return (STABILITY_MIN - 1);
-		}
-		
 		if (!doesGravityEffect(block.getType())) {
-			return STABILITY_MAX + 1 + block.getType().getMaxDurability();
+			if (!STABLE_MATERIALS.contains(block.getType())) {
+				return (STABILITY_MIN - 1);
+			} else {
+				return STABILITY_MAX + 1 + block.getType().getMaxDurability();
+			}
 		}
 
 		for (int s = STABILITY_DATA.length - 1; s >= 0; s--) {
