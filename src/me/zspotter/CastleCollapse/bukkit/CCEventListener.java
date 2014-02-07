@@ -37,7 +37,9 @@ public class CCEventListener implements Listener {
 		if (phys.doesGravityEffect(event.getTo())) {
 			// FallingBlock is landing
 			event.setCancelled(true);
-			phys.makeGravityBlock(event.getBlock());
+			event.getBlock().setType(event.getTo());
+			event.getBlock().setData(event.getData());
+			phys.applyGravity(event.getBlock());
 		}
 	}
 

@@ -50,18 +50,9 @@ public class ColorClayPhysicsOperator implements PhysicsOperator {
 	public boolean doesGravityEffect(Material material) {
 		return (material == GRAV_MATERIAL);
 	}
-	
-	@Override
-	public void makeGravityBlock(Block block) {
-		block.setType(GRAV_MATERIAL);
-		applyGravity(block);
-	}
 
 	@Override
-	public void applyGravity(Block block) throws IllegalArgumentException {
-		if (!doesGravityEffect(block.getType())) {
-			throw new IllegalArgumentException("Cannot apply gravity to "+block);
-		}
+	public void applyGravity(Block block) {
 		
 		int stability = calculateStability(block);
 		
@@ -91,37 +82,19 @@ public class ColorClayPhysicsOperator implements PhysicsOperator {
 		// toPlace will take the highest stability value of the following
 		// For horizontally adjacent and overhead blocks, this stability will be other.stability - 1
 		// For block underneath, this stability will be other.stability
-		int stabUnder = stabilityOf(block.getRelative(BlockFace.DOWN));
+		int stability = stabilityOf(block.getRelative(BlockFace.DOWN));
 		
-		int stabOther = -1;
-		int stabTmp;
+		stability = Math.max(stability, stabilityOf(block.getRelative(BlockFace.NORTH)) - 1);
+		stability = Math.max(stability, stabilityOf(block.getRelative(BlockFace.SOUTH)) - 1);
+		stability = Math.max(stability, stabilityOf(block.getRelative(BlockFace.EAST)) - 1);
+		stability = Math.max(stability, stabilityOf(block.getRelative(BlockFace.WEST)) - 1);
+		stability = Math.max(stability, stabilityOf(block.getRelative(BlockFace.UP)) - 1);
 		
-		stabTmp = stabilityOf(block.getRelative(BlockFace.NORTH));
-		if (stabTmp > stabOther) stabOther = stabTmp;
+		// Make sure stability >= 0 and <= MAX_STABILITY
+		stability = Math.max(stability, 0);
+		stability = Math.min(stability, STABILITY_MAX);
 		
-		stabTmp = stabilityOf(block.getRelative(BlockFace.SOUTH));
-		if (stabTmp > stabOther) stabOther = stabTmp;
-		
-		stabTmp = stabilityOf(block.getRelative(BlockFace.EAST));
-		if (stabTmp > stabOther) stabOther = stabTmp;
-		
-		stabTmp = stabilityOf(block.getRelative(BlockFace.WEST));
-		if (stabTmp > stabOther) stabOther = stabTmp;
-		
-		stabTmp = stabilityOf(block.getRelative(BlockFace.UP));
-		if (stabTmp > stabOther) stabOther = stabTmp;
-		
-		if (stabUnder < STABILITY_MIN && stabOther <= STABILITY_MIN) {
-			return STABILITY_MIN;
-		} else if (stabUnder > STABILITY_MAX || stabOther > STABILITY_MAX) {
-			return STABILITY_MAX;
-		}
-		
-		if (stabOther > stabUnder) {
-			return (stabOther - 1);
-		} else {
-			return stabUnder;
-		}
+		return stability;
 	}
 	
 	/**

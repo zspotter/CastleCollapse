@@ -8,7 +8,8 @@ public class CCPlugin extends JavaPlugin {
 		
 	@Override
 	public void onEnable() {
-		physics = new ColorClayPhysicsOperator(this);
+		//physics = new ColorClayPhysicsOperator(this);
+		physics = new MedievalPhysicsOperator(this);
 		
 		getServer().getPluginManager().registerEvents(new CCEventListener(this), this);
 	}

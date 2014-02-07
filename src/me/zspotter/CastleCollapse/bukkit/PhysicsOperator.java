@@ -12,17 +12,11 @@ public interface PhysicsOperator {
 	public boolean doesGravityEffect(Material material);
 	
 	/**
-	 * Turns any block into a gravity effected one and applies gravity to it
-	 * @param block The Block that will potentially be transformed
-	 */
-	public void makeGravityBlock(Block block);
-	
-	/**
 	 * Applies CC's gravity to a gravity affected block and updates adjacent blocks
 	 * @param block The Block to apply gravity to
 	 * @throws IllegalArgumentException Thrown if the Block's material is not able 
 	 * 	to be affected by CC's gravity
 	 */
-	public void applyGravity(Block block) throws IllegalArgumentException;
+	public void applyGravity(Block block);
 	
 }
